@@ -135,7 +135,7 @@
                 method: 'post',
                 data: {pid:pid, pname:pname, pprice:pprice, pimage:pimage, pcode:pcode},
                 success:function(response){
-                    $("message").html(response);
+                    $("#message").html(response);
                 }
             });
         });
