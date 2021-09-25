@@ -47,7 +47,8 @@
             <a class="nav-link" href="checkout.php">Checkout</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="cart.php"><i class="fas fa-shopping-cart"><span id="cart-item" class="badge badge-danger">  </span></i></a>
+            <a class="nav-link" href="cart.php"><i class="fas fa-shopping-cart"><span id="cart-item" class="badge badge-danger"></span></i>
+            </a>
         </li>
         
     </ul>
@@ -136,8 +137,25 @@
                 data: {pid:pid, pname:pname, pprice:pprice, pimage:pimage, pcode:pcode},
                 success:function(response){
                     $("#message").html(response);
+                    window.scrollTo(0 ,0); //When we click on any add to cart button it will make the page scroll to the top to see the message.
+                    load_cart_item_number();
                 }
             });
+
+            load_cart_item_number();
+
+            function load_cart_item_number()
+            {
+                $.ajax({
+                    url: 'action.php',
+                    method: 'get',
+                    data: {cartItem: "cart_item"},
+                    success: function(response)
+                    {
+                        $("#cart-item").html(response);   
+                    }
+                });
+            }
         });
     });
 </script>
