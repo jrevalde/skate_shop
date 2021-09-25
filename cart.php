@@ -1,3 +1,7 @@
+<?php 
+    session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,6 +15,7 @@
     <!--font-awesom library-->
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
 
 <nav class="navbar navbar-expand-md bg-dark navbar-dark"> <!--START OF NAV-->
@@ -60,6 +65,13 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-lg-10">
+            <!--This is a dynamic alert-->
+        <div style="display: <?php if(isset($_SESSION['showAlert'])){echo $_SESSION['showAlert'];} else {echo 'none';} unset($_SESSION['showAlert']); ?>" class="alert alert-success alert-dismissible mt-3"><!--Display-->
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <strong><?php if(isset($_SESSION['message'])){echo $_SESSION['message'];} unset($_SESSION['showAlert']); ?></strong> 
+        </div>
+
+
             <div class="table-responsive mt-2">
                 <table class="table table-bordered table-striped text-center">
                     <thead>
@@ -78,11 +90,12 @@
                         <th>Total Price</th>
                         <th>
                             <a href="action.php?clear=all" class="badge-danger badge p-1" onclick="return confirm('Are you sure you want to clear the cart?');">
-                                <i class="fas fa-trash"></i>&nbsp;&nbsp;Clear Cart
+                                <i class="fas fa-trash"></i>&nbsp;&nbsp;Clear Cart <!--When it's clicked it will pass a variable 'clear' as a get request to action.php-->
                             </a>
                         </th>
                     </tr>
                     </thead>
+
                     <tbody>
                         <?php include "config.php"; 
                         $stmnt = $conn->prepare("SELECT * FROM cart");
@@ -95,10 +108,14 @@
                         
                         <tr>
                             <td><?= $row['id'] ?></td>
+                            <input type="hidden" class="pid" value="<?= $row['id'] ?>">
                             <td><img src="<?= $row['product_image'] ?>" width="50" alt="Image of skate-deck"></td>
                             <td><?= $row['product_name'] ?></td>
                             <td>$<?= number_format($row['product_price'], 2); ?></td>
-                            <td><input type="number" class="form-control itemQty" value="<?= $row['qty'] ?>" style="width: 75px;"></td>
+                            <input type="hidden" class="pprice" value="<?=$row['product_price']?>">
+                            <td>
+                                <input type="number" class="form-control itemQty" value="<?= $row['qty'] ?>" style="width: 75px;">
+                            </td>
                             <td>$<?= number_format($row['total_price'], 2); ?></td>
                             <td>
                                 <a href="action.php?remove=<?= $row['id'] ?>" class="text-danger lead" onclick="return confirm('Do you want to remove this item?');">
@@ -108,6 +125,8 @@
                         </tr>
                         <?php $grand_total += $row['total_price']; ?>
                         <?php endwhile; ?>
+
+                        <!--The footer/bottom section of the table-->
                         <tr>
                             <td colspan="3" >
                                 <a href="index.php" class="btn btn-success"><i class="fas fa-cart_plus"></i>&nbsp;&nbsp;Continue Shopping</a>
@@ -122,6 +141,7 @@
                                 <a href="checkout.php" class="btn btn-info <?= ($grand_total > 1)?"":"disabled"; ?>"><i class="far fa-credit-card"></i>&nbsp;&nbsp;Checkout</a> <!--Cart button will disable if the grand total is less than 1-->
                             </td>
                         </tr>
+                        <!--End of table bottom section-->
                     </tbody>
                 </table>
             </div>
@@ -156,7 +176,26 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-        
+        //send product price, quantity and id to the server. from the server the cart will be updated with total price and quantity.        
+        $(".itemQty").on('change', function(){
+            var $el = $(this).closest("tr"); //tr is used because all the input tagas are inside the tr tag.
+
+            var pid = $el.find(".pid").val();
+            var pprice = $el.find(".pprice").val();
+            var qty = $el.find(".itemQty").val();
+            location.reload(true);
+            $.ajax({
+                url: "action.php",
+                method: "post",
+                cache: false,
+                data: {qty: qty, pid: pid, pprice: pprice},    
+                success: function(response)
+                {
+                   
+                    console.log(response);
+                }
+            });
+        });
 
         load_cart_item_number();
 
@@ -172,6 +211,8 @@
                 }
             });
         }
+
+
         
     });
 </script>
