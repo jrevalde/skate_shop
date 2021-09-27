@@ -105,11 +105,11 @@
                     <input type="tel" name="phone" class="form-control" placeholder="Enter phone number please." required>
                 </div>
                 <div class="form-group">
-                    <textarea name="address" id="a" cols="10" rows="3" class="form-control" placeholder="Enter your delivery address here please."></textarea>
+                    <textarea name="address" id="a" cols="10" rows="3" class="form-control" placeholder="Enter your delivery address here please." required></textarea>
                 </div>
                 <h6 class="text-center lead">Select Payment Mode</h6>
                 <div class="form-group">
-                    <select name="pmode" class="form-control" id="">
+                    <select name="pmode" class="form-control" id="" required> 
                         <option value="" selected disabled>Select Payment Mode</option>
                         <option value="cod">Cash on delivery</option>
                         <option value="netbanking">Net Banking</option>

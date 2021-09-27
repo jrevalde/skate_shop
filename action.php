@@ -113,6 +113,8 @@
 
     }   
 
+
+    //recieves data passed from checkout form, inserts the data into an orders table and prints out a confirmation. 
     if(isset($_POST['action']) && isset($_POST['action']) == 'order')
     {
         $name = $_POST['name'];
@@ -125,18 +127,41 @@
 
         $data = "";
 
+        //takes the qty from cart table and substracts the stock in products table
+        $sql1 = "SELECT qty, product_code FROM cart";
+        
+        $result = $conn->query($sql1);
+
+        while($row = $result->fetch_assoc())
+        {
+            
+            //echo $row['qty'] . " <br>" . $row['product_code'] . "<br>"; (Just checking that the value comes through.)
+            $stocktake = $conn->prepare("UPDATE product SET stock = stock - ? WHERE product_code = ?");
+            $stocktake->bind_param("is",$row['qty'] , $row['product_code']);
+            $stocktake->execute();
+        }
+        
+        /*
+            loop through each row of the cart => trigger another sql query 
+        */
+
+        //print out confirmation 
         $stmnt = $conn->prepare("INSERT INTO orders (name, email, phone, address, pmode, products, amount_paid) VALUES (?, ?, ?, ?, ?, ?, ?)");
         $stmnt->bind_param("sssssss", $name, $email, $phone, $address, $pmode, $products, $grand_total);
         $stmnt->execute();
         $data .= "<div class='text-center'>
                         <h1 class='display-4 mt-2 text-danger'>Your order placed successfully.</h1>
-                        <h4 class='bg-danger text-light rounded p-2'>Items Purchased : '.$products.'</h4>
-                        <h4>Your Name : '.$name.'</h4>
-                        <h4>Your Email : '.$email.'</h4>
-                        <h4>Your Phone : '.$phone.'</h4>
-                        <h4>Total Amount Paid : '.number_format($grand_total, 2).'</h4>
-                        <h4>Payment Mode : '.$pmode.'</h4>
+                        <h4 class='bg-danger text-light rounded p-2'>Items Purchased : $products</h4>
+                        <h4>Your Name : $name</h4>
+                        <h4>Your Email : $email</h4>
+                        <h4>Your Phone : $phone</h4>
+                        <h4>Total Amount Paid : number_format($grand_total, 2)</h4>
+                        <h4>Payment Mode : $pmode</h4>
                     </div>";
         echo $data;
     }
+
+   
+
+    
 ?>   
