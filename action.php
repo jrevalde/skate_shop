@@ -82,7 +82,7 @@
         $stmnt->bind_param("i", $id);
         $stmnt->execute();
         
-        $_SESSION['showAlert'] = 'block';
+        $_SESSION['showAlert'] = 'block'; //so this carries over to the cart so it can dynamically show the div that confirms that the item was removed.
         $_SESSION['message'] = 'item removed from cart.';
         header('location: cart.php'); //redirects to the cart.
     }
