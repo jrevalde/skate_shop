@@ -141,9 +141,6 @@
             $stocktake->execute();
         }
         
-        /*
-            loop through each row of the cart => trigger another sql query 
-        */
 
         //print out confirmation 
         $stmnt = $conn->prepare("INSERT INTO orders (name, email, phone, address, pmode, products, amount_paid) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -160,6 +157,8 @@
                     </div>";
         echo $data;
     }
+
+
 
    
 
