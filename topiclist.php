@@ -1,45 +1,87 @@
 <?php
-require "config.php";
+include "config.php";
 
-//Check for required fields from the form
+//gather the topics
 
-if (!$_POST['topic_owner'] || !$_POST['topic_title'] || !$_POST['post_text'])
+$get_topics_sql = "SELECT topic_id, topic_title, DATE_FORMAT(topic_create_time, '%b, %e, %Y at %r') AS
+fmt_topic_create_time, topic_owner FROM forum_topics
+ORDER BY topic_create_time DESC";
+
+$get_topic_res = $conn->query($get_topics_sql);
+
+if ($get_topic_res->num_rows < 1) //checks if there are any topics
 {
-    header("Location: addtopic.php");
-    exit;
+    $display_block = "<p><em>No topics exist.</em></en></p>";
 }
+else
+{
+    //create the display string.
+    $display_block = <<<EOT
+    <div class="table-responsive mt-2">
+    <table class='table table-bordered table-striped text-center'>
+        <thead>
+            <tr>
+                <td colspan="7">
+                    <h4 class="text-center text-info m-0">Topics in Forum</h4>
+                </td>
+            </tr>        
+            <tr>
+                <th>
+                    TOPIC TITLE
+                </th>
+                <th>
+                    # of Posts
+                </th>
+            </tr>
 
-//clean the values to be inputed into the databse
+        </thead>
+ 
+    EOT;
 
-$clean_topic_owner =  $conn->real_escape_string($_POST['topic_owner']);   
-$clean_topic_title = $conn->real_escape_string($_POST['topic_title']);   
-$clean_post_text = $conn->real_escape_string($_POST['post_text']);    
+    while($topic_info = $get_topic_res->fetch_assoc())
+    {
+        $topic_id = $topic_info['topic_id'];
+        $topic_title = stripslashes($topic_info['topic_title']);
+        $topic_create_time = $topic_info['fmt_topic_create_time'];
+        $topic_owner = stripslashes($topic_info['topic_owner']);
 
-//Query for inserting into forum_topics
+        //get number of posts
+        $get_num_posts_sql = "SELECT COUNT(post_id) AS post_count FROM
+        forum_posts WHERE topic_id = '". $topic_id."'";
 
-$add_topic_sql = "INSERT INTO forum_topics (topic_title, topic_create_time, topic_owner)
-VALUES ('".$clean_topic_title ."', now(), '".$clean_topic_owner."')";
+        $get_num_posts_res = $conn->query($get_num_posts_sql);
 
-$add_topic_res = $conn->query($add_topic_sql);
+        while($posts_info = $get_num_posts_res->fetch_assoc())
+        {
+            $num_posts = $posts_info['post_count'];
+        }
 
-/*get id of the last query. retrieves the primary key ID of last inserted record into database. it gets Id value from forum topics table.  
-It will become the entry the entry for the topic_id field in the forum posts table.*/
-$topic_id = $conn->insert_id;
+        //add to display
+        $display_block .= <<<EOT
+        <tbody>
+            <tr>
+                <td>
+                    <a href='show-topic.php?topic_id=$topic_id'><strong>$topic_title</strong></a><br>
+                    Created on $topic_create_time by $topic_owner
+                </td>
+                <td>$num_posts</td>
+            </tr>            
+        </tbody>
 
-//Creating and issuing the second query to insert into forum_posts
+        EOT;
+    }
 
-$add_post_sql = "INSERT INTO forum_posts (topic_id, post_text, post_create_time, post_owner) VALUES
-('".$topic_id."', '".$clean_post_text."',
-now(), '".$clean_topic_owner."')";
+    //free results
+    mysqli_free_result($get_topic_res);
+    mysqli_free_result($get_num_posts_res);
 
-$add_post_res = $conn->query($add_post_sql);
+    //close connection to MySQL
+    $conn->close();
 
-//close connection to Mysql
+    //close the table
 
-$conn->close(); 
-
-//Send a nice message to the user.
-$display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has been created.</p>";
+    $display_block .= "</table></div>";
+}
 ?>
 
 <!DOCTYPE html>
@@ -79,10 +121,10 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Forum</a>
+            <a class="nav-link  active" href="#">Forum</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="index.php">Products</a>
+            <a class="nav-link" href="index.php">Products</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Categories</a>
@@ -97,12 +139,10 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
 </nav> <!--END OF NAV-->
 
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 px-4 pb-4">
-            <h1>New Topic has been Added</h1>
-            <?php echo $display_block; ?>
-        </div>
-
+    <div id="message"></div>
+    <div class="row mt-2 pb-3">
+        <?= $display_block; ?>
+        <p>Would you like to <a href="addtopic.php">add a topic</a>?</p>
     </div>
 </div>
 
@@ -132,6 +172,7 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
 <script type="text/javascript">
     $(document).ready(function(){
         
+
         load_cart_item_number();
 
         function load_cart_item_number()
@@ -146,7 +187,7 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
                 }
             });
         }
-        
+       
     });
 </script>
     

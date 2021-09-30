@@ -1,46 +1,92 @@
 <?php
-require "config.php";
+    include "config.php";
 
-//Check for required fields from the form
+    //Check required info from the query string
 
-if (!$_POST['topic_owner'] || !$_POST['topic_title'] || !$_POST['post_text'])
-{
-    header("Location: addtopic.php");
-    exit;
-}
+    if(!isset($_GET['topic_id']))
+    {
+        header("Location: topiclist.php");
+        exit;
+    }
 
-//clean the values to be inputed into the databse
+    //clean the values to be used
 
-$clean_topic_owner =  $conn->real_escape_string($_POST['topic_owner']);   
-$clean_topic_title = $conn->real_escape_string($_POST['topic_title']);   
-$clean_post_text = $conn->real_escape_string($_POST['post_text']);    
+    $safe_topic_id = $conn->real_escape_string($_GET['topic_id']);
+    
+    //verify the topic exists
+    $verify_topic_sql = "SELECT topic_title FROM forum_topics WHERE topic_id = '" . $safe_topic_id. "'";
+    $verify_topic_res = $conn->query($verify_topic_sql);
 
-//Query for inserting into forum_topics
+    if ($verify_topic_res->num_rows < 1)
+    {
+        //the topic doesn't exist
+        $display_block = "<p><em>You have selected an invalid topic.<br>
+        Please <a href='topiclist.php'>try again</a>.
+        </em></p>";
+    }
+    else
+    {
+        //get the topic title
+        while($topic_info = $verify_topic_res->fetch_assoc())
+        {
+            $topic_title = stripslashes($topic_info['topic_title']);
+        }
+        //gather the posts
 
-$add_topic_sql = "INSERT INTO forum_topics (topic_title, topic_create_time, topic_owner)
-VALUES ('".$clean_topic_title ."', now(), '".$clean_topic_owner."')";
+        $get_posts_sql = "SELECT post_id, post_text, DATE_FORMAT(post_create_time,
+        '%b %e %Y<br>%r') AS fmt_post_create_time, post_owner FROM forum_posts WHERE topic_id = '". $safe_topic_id."'
+        ORDER BY post_create_time ASC";
 
-$add_topic_res = $conn->query($add_topic_sql);
+        $get_posts_res = $conn->query($get_posts_sql);
 
-/*get id of the last query. retrieves the primary key ID of last inserted record into database. it gets Id value from forum topics table.  
-It will become the entry the entry for the topic_id field in the forum posts table.*/
-$topic_id = $conn->insert_id;
+        //create the display string
+        $display_block = <<<EOT
+            <p>Showing posts for the<strong>$topic_title</strong> topic:</p>
+            <table>
+                <tr>
+                    <th>Author</th>
+                    <th>Post</th>
+                </tr>
+        EOT;
 
-//Creating and issuing the second query to insert into forum_posts
+        while($posts_info = $get_posts_res->fetch_assoc())
+        {
+            $post_id = $posts_info['post_id'];
+            $post_text = nl2br(stripslashes($posts_info['post_text'])); //this function inserts line-breaks where newlines (\n) appear in the string.
+            $post_create_time = $posts_info['fmt_post_create_time'];
+            $post_owner = stripslashes($posts_info['post_owner']);
 
-$add_post_sql = "INSERT INTO forum_posts (topic_id, post_text, post_create_time, post_owner) VALUES
-('".$topic_id."', '".$clean_post_text."',
-now(), '".$clean_topic_owner."')";
+            //add to display
+            $display_block .= <<<EOT
+                <tr>
+                    <td>
+                        $post_owner<br>
+                        created on: <br>$post_create_time
+                    </td>
+                    <td>
+                        $post_text<br>
+                        <a href='replytopost.php?post_id=$post_id'><strong>REPLY TO POST</strong></a>
+                    </td>
+                </tr>
+            EOT;
+        }
 
-$add_post_res = $conn->query($add_post_sql);
+        //free results
 
-//close connection to Mysql
+        mysqli_free_result($get_posts_res);
+        mysqli_free_result($verify_topic_res);
 
-$conn->close(); 
+        //close connection to MySql
+        $conn->close();
 
-//Send a nice message to the user.
-$display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has been created.</p>";
+        //close up the table
+
+        $display_block .= "</table>";
+    }
+
+
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +94,7 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>skate_shop</title>
+    <title>Posts in Topic</title>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -97,12 +143,10 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
 </nav> <!--END OF NAV-->
 
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-lg-6 px-4 pb-4">
-            <h1>New Topic has been Added</h1>
-            <?php echo $display_block; ?>
-        </div>
-
+    <div id="message"></div>
+    <div class="row mt-2 pb-3">
+        <h1>Posts in Topic</h1>
+        <?php echo $display_block; ?>
     </div>
 </div>
 
@@ -131,7 +175,8 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
 
 <script type="text/javascript">
     $(document).ready(function(){
-        
+       
+
         load_cart_item_number();
 
         function load_cart_item_number()
