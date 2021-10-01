@@ -1,104 +1,41 @@
 <?php
     include "config.php";
 
-    //Check required info from the query string
-
-    if(!isset($_GET['topic_id']))
+    //check to see if we're showing the form or adding the post
+    if(!$_POST)
     {
+        //showing the form; check for required item in query string
+        if (!isset($_GET['post_id']))
+        {
+            header("Location: topiclist.php");
+            exit;
+        }
+    }
+
+    //create safe values for use
+    $safe_post_id = $conn->real_escape_string($_GET['post_id']);
+    
+    $verify_sql = "SELECT ft.topic_id, ft.topic_title FROM forum_posts AS fp LEFT JOIN forum_topics AS ft.topic_id = ft.topic_id WHERE fp.post_id = '".$safe_post_id."'";
+    $verify_res = $conn->query($verify_sql);
+
+    if ($verify_res->num_rows < 1)
+    {
+        //this post or topic does not exist
         header("Location: topiclist.php");
         exit;
     }
-
-    //clean the values to be used
-
-    $safe_topic_id = $conn->real_escape_string($_GET['topic_id']);
-    
-    //verify the topic exists
-    $verify_topic_sql = "SELECT topic_title FROM forum_topics WHERE topic_id = '" . $safe_topic_id. "'";
-    $verify_topic_res = $conn->query($verify_topic_sql);
-
-    if ($verify_topic_res->num_rows < 1)
-    {
-        //the topic doesn't exist
-        $display_block = "<p><em>You have selected an invalid topic.<br>
-        Please <a href='topiclist.php'>try again</a>.
-        </em></p>";
-    }
     else
     {
-        //get the topic title
-        while($topic_info = $verify_topic_res->fetch_assoc())
+        //get the topic id and title
+        while($topic_info = mysqli_fetch_array($verify_res))
         {
+            $topic_id = $topic_info['topic_id'];
             $topic_title = stripslashes($topic_info['topic_title']);
         }
-        //gather the posts
-
-        $get_posts_sql = "SELECT post_id, post_text, DATE_FORMAT(post_create_time,
-        '%b %e %Y<br>%r') AS fmt_post_create_time, post_owner FROM forum_posts WHERE topic_id = '". $safe_topic_id."'
-        ORDER BY post_create_time ASC";
-
-        $get_posts_res = $conn->query($get_posts_sql);
-
-        //create the display string
-        $display_block = <<<EOT
-            h
-
-            <div class="table-responsive mt-2">
-            <table class='table table-bordered table-striped text-center'>
-                <thead>
-                    <tr>
-                        <td colspan="7">
-                            <h4 class="text-center text-info m-0">Showing posts for the<strong>$topic_title</strong> topic:</h4>
-                        </td>
-                    </tr>    
-                    <tr>
-                        <th>Author</th>
-                        <th>Post</th>
-                    </tr>
-                </thead>
-               
-        EOT;
-
-        while($posts_info = $get_posts_res->fetch_assoc())
-        {
-            $post_id = $posts_info['post_id'];
-            $post_text = nl2br(stripslashes($posts_info['post_text'])); //this function inserts line-breaks where newlines (\n) appear in the string.
-            $post_create_time = $posts_info['fmt_post_create_time'];
-            $post_owner = stripslashes($posts_info['post_owner']);
-
-            //add to display
-            $display_block .= <<<EOT
-            <tbody>
-                <tr>
-                    <td>
-                        $post_owner<br>
-                        created on: <br>$post_create_time
-                    </td>
-                    <td>
-                        $post_text<br>
-                        <a href='replytopost.php?post_id=$post_id'><strong>REPLY TO POST</strong></a>
-                    </td>
-                </tr>
-            </tbody>
-
-            EOT;
-        }
-
-        //free results
-
-        mysqli_free_result($get_posts_res);
-        mysqli_free_result($verify_topic_res);
-
-        //close connection to MySql
-        $conn->close();
-
-        //close up the table
-
-        $display_block .= "</table></div>";
-    }
-
-
+    
 ?>
+
+
 
 
 <!DOCTYPE html>
@@ -107,7 +44,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posts in Topic</title>
+    <title><h1>Post your reply in <?php echo $topic_title; ?></h1></title>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -158,8 +95,18 @@
 <div class="container">
     <div id="message"></div>
     <div class="row mt-2 pb-3">
-        <h1>Posts in Topic</h1>
-        <?php echo $display_block; ?>
+       <h1>Post your reply in <?php echo $_SERVER['PHP_SELF']; ?></h1>
+       <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+            <p><label for="post_owner">Your Email Address:</label>
+            <input type="email" id="post_owner" name="post_owner" size="40" maxlength="150" required>    
+        </p>
+        <p>
+            <label for="post_text">Post Text:</label><br>
+            <textarea name="post_text" id="post_text" cols="40" rows="8" placeholder="Please write a post..." required></textarea>
+        </p>
+        <input type="hidden" name="topic_id" value="<?php echo $topic_id; ?>">
+        <button type="sobmit" name="sobmit" value="sobmit">Add Post</button>
+       </form>
     </div>
 </div>
 
@@ -188,7 +135,7 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-       
+        
 
         load_cart_item_number();
 
@@ -204,9 +151,46 @@
                 }
             });
         }
-        
+       
     });
 </script>
     
 </body>
 </html>
+
+<?php
+    }
+    //free result
+    mysqli_free_result($verify_res);
+
+    //close connection to MySql
+    $conn->close();
+
+}
+else if ($_POST)
+{
+    //check for required items from form
+    if ((!$_POST['topic_id']) || (!$_POST['post_text']) || (!$_POST['post_owner']))
+    {
+        header("Location: topiclist.php");
+        exit;
+    }
+
+    //create safe values for use
+    $safe_topic_id = $conn->real_escape_string($_POST['topic_id']);
+    $safe_post_text = $conn->real_escape_string($_POST['post_text']);
+    $safe_post_owner = $conn->real_escape_string($_POST['post_owner']);
+
+    //add the post
+    $add__post_sql = "INSERT INTO forum_posts (topic_ic, post_text, post_create_time, post_owner) VALUES ('".$safe_topic_id."', '".$safe_post_text."', now(), '".$safe_post_owner."')";
+
+    $add_post_res = $conn->query($add__post_sql);
+
+    //close connection to MySQL
+
+    $conn->close();
+    //redirect user to topic
+    header("Location: showtopic.php?topic_id=".$_POST['topic_id']);
+    exit;
+}    
+?>
