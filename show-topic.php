@@ -41,7 +41,7 @@
 
         //create the display string
         $display_block = <<<EOT
-            h
+            
 
             <div class="table-responsive mt-2">
             <table class='table table-bordered table-striped text-center'>
@@ -138,10 +138,10 @@
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Forum</a>
+            <a class="nav-link active" href="topiclist.php">Forum</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="index.php">Products</a>
+            <a class="nav-link" href="index.php">Products</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Categories</a>

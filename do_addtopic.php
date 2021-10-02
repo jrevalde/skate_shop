@@ -79,10 +79,10 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Forum</a>
+            <a class="nav-link active" href="topiclist.php">Forum</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="index.php">Products</a>
+            <a class="nav-link" href="index.php">Products</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Categories</a>

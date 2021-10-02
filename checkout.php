@@ -63,7 +63,7 @@
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Forum</a>
+            <a class="nav-link" href="topiclist.php">Forum</a>
         </li>
         <li class="nav-item">
             <a class="nav-link active" href="index.php">Products</a>
