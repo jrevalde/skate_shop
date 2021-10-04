@@ -65,7 +65,7 @@ else
         <tbody>
             <tr>
                 <td>
-                    <a href='show-topic.php?topic_id=$topic_id'><strong>$topic_title</strong></a><br>
+                    <a href='show-topic.php?topic_id=$topic_id & c_id=$c_id'><strong>$topic_title</strong></a><br>
                     Created on $topic_create_time by $topic_owner
                 </td>
                 <td>$num_posts</td>

@@ -2,10 +2,11 @@
     include "config.php";
 
     //Check required info from the query string
-
+    $c_id = $_GET['c_id'];
     if(!isset($_GET['topic_id']))
-    {
-        header("Location: topiclist.php");
+    {   
+        echo "<h1>Big nuts</h1>";
+        //header("Location: topiclist.php");
         exit;
     }
 
@@ -76,7 +77,7 @@
                     </td>
                     <td>
                         $post_text<br>
-                        <a href='replytopost.php?post_id=$post_id'><strong>REPLY TO POST</strong></a>
+                        <a href='replytopost.php?post_id=$post_id & c_id=$c_id'><strong>REPLY TO POST</strong></a>
                     </td>
                 </tr>
             </tbody>

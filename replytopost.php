@@ -5,7 +5,7 @@
     if(!$_POST)
     {
         //showing the form; check for required item in query string
-        if (!isset($_GET['post_id']))
+        if (!isset($_GET['post_id']) || !isset($_GET['c_id']))
         {
             //echo "<h1>Big nut</h1>";
             header("Location: topiclist.php");
@@ -105,8 +105,9 @@
                     <div class="valid-feedback">Valid.</div>
                     <div class="invalid-feedback">Please fill out this field.</div>
                 </div>
-                
+                <input type="hidden" name="c_id" value="<?php echo $_GET['c_id']; ?>">
                 <input type="hidden" name="topic_id" value="<?php echo $topic_id; ?>">
+                <?php echo $topic_id. "<br>"; ?>
                 <button type="submit" name="submit" value="submit" class="btn btn-primary btn-block">Add Post</button>
         </form>
         </div>
@@ -192,7 +193,7 @@
     else if($_POST)
     {
         //check for required items from form
-        if ((!$_POST['topic_id']) || (!$_POST['post_text']) || (!$_POST['post_owner']))
+        if ((!$_POST['topic_id']) || (!$_POST['post_text']) || (!$_POST['post_owner']) || (!$_POST['c_id']))
         {
             header("Location: topiclist.php");
             exit;
@@ -202,9 +203,10 @@
         $safe_topic_id = $conn->real_escape_string($_POST['topic_id']);
         $safe_post_text = $conn->real_escape_string($_POST['post_text']);
         $safe_post_owner = $conn->real_escape_string($_POST['post_owner']);
+        $c_id = $_POST['c_id'];
 
         //add the post
-        $add__post_sql = "INSERT INTO forum_posts (topic_id, post_text, post_create_time, post_owner) VALUES ('".$safe_topic_id."', '".$safe_post_text."', now(), '".$safe_post_owner."')";
+        $add__post_sql = "INSERT INTO forum_posts (topic_id, post_text, post_create_time, post_owner, c_id) VALUES ('".$safe_topic_id."', '".$safe_post_text."', now(), '".$safe_post_owner."', '".$c_id."')";
 
         $add_post_res = $conn->query($add__post_sql);
 
@@ -212,7 +214,7 @@
 
         $conn->close();
         //redirect user to topic
-        header("Location: show-topic.php?topic_id=".$_POST['topic_id']);
+        header("Location: show-topic.php?topic_id=$safe_topic_id & c_id=$c_id");
         exit;
     }    
 ?>
