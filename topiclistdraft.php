@@ -1,21 +1,17 @@
 <?php
 include "config.php";
 
-//get variable from forum categories.php
-$c_id = $_GET['c_id'];
-$c_title = $_GET['c_title'];
-
-//gather the topics according to category
+//gather the topics
 
 $get_topics_sql = "SELECT topic_id, topic_title, DATE_FORMAT(topic_create_time, '%b, %e, %Y at %r') AS
-fmt_topic_create_time, topic_owner FROM forum_topics WHERE c_id = '". $_GET['c_id']."'
+fmt_topic_create_time, topic_owner FROM forum_topics
 ORDER BY topic_create_time DESC";
 
 $get_topic_res = $conn->query($get_topics_sql);
 
 if ($get_topic_res->num_rows < 1) //checks if there are any topics
 {
-    $display_block = "<p><em>No topics exist.</em></en></p><br>";
+    $display_block = "<p><em>No topics exist.</em></en></p>";
 }
 else
 {
@@ -26,7 +22,7 @@ else
         <thead>
             <tr>
                 <td colspan="7">
-                    <h4 class="text-center text-info m-0">$c_title Topics</h4>
+                    <h4 class="text-center text-info m-0">Category Topics</h4>
                 </td>
             </tr>        
             <tr>
@@ -142,7 +138,7 @@ else
 <div class="container">
     <div class="row mt-2 pb-3">
         <?= $display_block; ?>
-        <p>Would you like to <a href="addtopic.php?c_id=<?= $c_id ?> & c_title=<?= $c_title ?>">add a topic</a>?</p>
+        <p>Would you like to <a href="addtopic.php">add a topic</a>?</p>
     </div>
 </div>
 

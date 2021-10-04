@@ -3,7 +3,7 @@ require "config.php";
 
 //Check for required fields from the form
 
-if (!$_POST['topic_owner'] || !$_POST['topic_title'] || !$_POST['post_text'])
+if (!$_POST['topic_owner'] || !$_POST['topic_title'] || !$_POST['post_text'] || !$_POST['c_id'])
 {
     header("Location: addtopic.php");
     exit;
@@ -14,11 +14,11 @@ if (!$_POST['topic_owner'] || !$_POST['topic_title'] || !$_POST['post_text'])
 $clean_topic_owner =  $conn->real_escape_string($_POST['topic_owner']);   
 $clean_topic_title = $conn->real_escape_string($_POST['topic_title']);   
 $clean_post_text = $conn->real_escape_string($_POST['post_text']);    
-
+$c_id = $_POST['c_id'];
 //Query for inserting into forum_topics
 
-$add_topic_sql = "INSERT INTO forum_topics (topic_title, topic_create_time, topic_owner)
-VALUES ('".$clean_topic_title ."', now(), '".$clean_topic_owner."')";
+$add_topic_sql = "INSERT INTO forum_topics (topic_title, topic_create_time, topic_owner, c_id)
+VALUES ('".$clean_topic_title ."', now(), '".$clean_topic_owner."', '".$c_id."')";
 
 $add_topic_res = $conn->query($add_topic_sql);
 
@@ -28,9 +28,9 @@ $topic_id = $conn->insert_id;
 
 //Creating and issuing the second query to insert into forum_posts
 
-$add_post_sql = "INSERT INTO forum_posts (topic_id, post_text, post_create_time, post_owner) VALUES
+$add_post_sql = "INSERT INTO forum_posts (topic_id, post_text, post_create_time, post_owner, c_id) VALUES
 ('".$topic_id."', '".$clean_post_text."',
-now(), '".$clean_topic_owner."')";
+now(), '".$clean_topic_owner."', '".$c_id."')";
 
 $add_post_res = $conn->query($add_post_sql);
 
@@ -73,19 +73,16 @@ $display_block = "<p>The <strong>" .$_POST['topic_title']. "</strong>topic has b
             <a class="nav-link" href="#">Login</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="index.php">About</a>
+            <a class="nav-link" href="#">About</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link active" href="topiclist.php">Forum</a>
+            <a class="nav-link active" href="forumcategories.php">Forum</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="index.php">Products</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Categories</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="cart.php"><i class="fas fa-shopping-cart"><span id="cart-item" class="badge badge-danger"></span></i>

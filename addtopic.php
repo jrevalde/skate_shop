@@ -1,10 +1,13 @@
+<?php
+    include "config.php";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adda a topic</title>
+    <title>Add a topic</title>
 
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -29,19 +32,16 @@
             <a class="nav-link" href="#">Login</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="index.php">About</a>
+            <a class="nav-link" href="#">About</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link  active" href="topiclist.php">Forum</a>
+            <a class="nav-link  active" href="forumcategories.php">Forum</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="index.php">Products</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Categories</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="cart.php"><i class="fas fa-shopping-cart"><span id="cart-item" class="badge badge-danger"></span></i>
@@ -58,8 +58,10 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-6 px-4 pb-4">
-            <h1>Add a Topic</h1>
+            <h1>Add a Topic for <?php echo $_GET['c_title']; ?></h1>
             <form action="do_addtopic.php" method="post" class="needs-validation">
+                <input type="hidden" value="<?php echo $_GET['c_id']; ?>" name="c_id">
+
                 <div class="form-group">
                     <label for="topic_owner">Email address:</label>
                     <input type="email" class="form-control" placeholder="Enter email" id="topic_owner" name="topic_owner" required>

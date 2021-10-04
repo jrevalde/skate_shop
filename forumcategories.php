@@ -1,21 +1,16 @@
 <?php
 include "config.php";
 
-//get variable from forum categories.php
-$c_id = $_GET['c_id'];
-$c_title = $_GET['c_title'];
+//gather the categories
 
-//gather the topics according to category
+$get_categories_sql = "SELECT *
+FROM categories";
 
-$get_topics_sql = "SELECT topic_id, topic_title, DATE_FORMAT(topic_create_time, '%b, %e, %Y at %r') AS
-fmt_topic_create_time, topic_owner FROM forum_topics WHERE c_id = '". $_GET['c_id']."'
-ORDER BY topic_create_time DESC";
+$get_category_res = $conn->query($get_categories_sql);
 
-$get_topic_res = $conn->query($get_topics_sql);
-
-if ($get_topic_res->num_rows < 1) //checks if there are any topics
+if ($get_category_res->num_rows < 1) //checks if there are any topics
 {
-    $display_block = "<p><em>No topics exist.</em></en></p><br>";
+    $display_block = "<p><em>No Categories exist.</em></en></p>";
 }
 else
 {
@@ -26,15 +21,18 @@ else
         <thead>
             <tr>
                 <td colspan="7">
-                    <h4 class="text-center text-info m-0">$c_title Topics</h4>
+                    <h4 class="text-center text-info m-0">Forum Categories</h4>
                 </td>
             </tr>        
             <tr>
                 <th>
-                    TOPIC TITLE
+                    Category Title
                 </th>
                 <th>
-                    # of Posts
+                    # of Topics
+                </th>
+                <th>
+                    Description                    
                 </th>
             </tr>
 
@@ -42,22 +40,22 @@ else
  
     EOT;
 
-    while($topic_info = $get_topic_res->fetch_assoc())
+    while($category_info = $get_category_res->fetch_assoc())
     {
-        $topic_id = $topic_info['topic_id'];
-        $topic_title = stripslashes($topic_info['topic_title']);
-        $topic_create_time = $topic_info['fmt_topic_create_time'];
-        $topic_owner = stripslashes($topic_info['topic_owner']);
+        $c_id = $category_info['c_id'];
+        $c_title = stripslashes($category_info['c_title']);
+        $c_desc = $category_info['c_desc'];
+        
 
-        //get number of posts
-        $get_num_posts_sql = "SELECT COUNT(post_id) AS post_count FROM
-        forum_posts WHERE topic_id = '". $topic_id."'";
+        //get number of topics
+        $get_num_topics_sql = "SELECT COUNT(c_id) AS topic_count FROM
+        forum_topics WHERE c_id = '". $c_id."'";
 
-        $get_num_posts_res = $conn->query($get_num_posts_sql);
+        $get_num_topics_res = $conn->query($get_num_topics_sql);
 
-        while($posts_info = $get_num_posts_res->fetch_assoc())
+        while($topics_info = $get_num_topics_res->fetch_assoc())
         {
-            $num_posts = $posts_info['post_count'];
+            $num_topics = $topics_info['topic_count'];
         }
 
         //add to display
@@ -65,10 +63,13 @@ else
         <tbody>
             <tr>
                 <td>
-                    <a href='show-topic.php?topic_id=$topic_id'><strong>$topic_title</strong></a><br>
-                    Created on $topic_create_time by $topic_owner
+                    <a href='topiclist.php?c_id=$c_id & c_title=$c_title'><strong>$c_title</strong></a><br>
+                    
                 </td>
-                <td>$num_posts</td>
+                <td>$num_topics</td>
+                <td>
+                    <p>$c_desc</p>
+                </td>
             </tr>            
         </tbody>
 
@@ -76,8 +77,8 @@ else
     }
 
     //free results
-    mysqli_free_result($get_topic_res);
-    mysqli_free_result($get_num_posts_res);
+    mysqli_free_result($get_category_res);
+    mysqli_free_result($get_num_topics_res);
 
     //close connection to MySQL
     $conn->close();
@@ -125,7 +126,7 @@ else
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link  active" href="forumcategories.php">Forum</a>
+            <a class="nav-link  active" href="topiclist.php">Forum</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="index.php">Products</a>
@@ -139,12 +140,22 @@ else
   </div>
 </nav> <!--END OF NAV-->
 
+
+
+
+<!--START OF CATEGORIES DISPLAY-->
 <div class="container">
+
     <div class="row mt-2 pb-3">
         <?= $display_block; ?>
-        <p>Would you like to <a href="addtopic.php?c_id=<?= $c_id ?> & c_title=<?= $c_title ?>">add a topic</a>?</p>
     </div>
+
+    
 </div>
+<!--END OF CATEGORIES DISPLAY-->
+
+
+
 
 <!-- Footer -->
 <footer class="page-footer font-small blue">
@@ -187,7 +198,7 @@ else
                 }
             });
         }
-       
+        
     });
 </script>
     

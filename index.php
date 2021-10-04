@@ -29,19 +29,16 @@
             <a class="nav-link" href="#">Login</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="index.php">About</a>
+            <a class="nav-link" href="#">About</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="topiclist.php">Forum</a>
+            <a class="nav-link" href="forumcategories.php">Forum</a>
         </li>
         <li class="nav-item">
             <a class="nav-link active" href="index.php">Products</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Categories</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="cart.php"><i class="fas fa-shopping-cart"><span id="cart-item" class="badge badge-danger"></span></i>
