@@ -156,6 +156,12 @@
                         <h4>Payment Mode : $pmode</h4>
                     </div>";
         echo $data;
+
+        //We then want to delete all from Cart since it has already been purchased and recorded in the orders table. 
+
+        $snt_sql = "DELETE from cart";
+
+        $snt_res = $conn->query($snt_sql);
     }
 
 

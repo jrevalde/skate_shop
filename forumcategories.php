@@ -117,16 +117,13 @@ else
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a class="nav-link" href="#">Login</a>
-        </li>
-        <li class="nav-item">
             <a class="nav-link" href="#">About</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Contact Us</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link  active" href="topiclist.php">Forum</a>
+            <a class="nav-link  active" href="forumcategories.php">Forum</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="index.php">Products</a>
