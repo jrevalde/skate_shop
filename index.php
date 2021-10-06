@@ -46,46 +46,59 @@
   </div>
 </nav> <!--END OF NAV-->
 
+
+
+
+<!--START OF PRODUCT CATEGORIES DISPLAY-->
 <div class="container">
-    <div id="message"></div>
-    <div class="row mt-2 pb-3">
-        <?php include "config.php";
-            $stmnt = $conn->prepare("SELECT * FROM product");
+    <div class="table-responsive mt-2">
+        <table class='table table-bordered table-striped text-center'>
+            <thead>
+                <tr>
+                    <td colspan="7">
+                        <h4 class="text-center text-info m-0">PRODUCT CATEGORIES</h4>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <th>Desc</th>
+                </tr>
+            </thead>
 
-            $stmnt->execute();
+            <tbody>
+                <?php 
 
-            $result = $stmnt->get_result(); //store the result of query into a variable.
+                include "config.php";
+                $stmnt = $conn->prepare("SELECT * FROM product_categories");
 
-            while($row = $result->fetch_assoc()):
-        ?>
+                $stmnt->execute();
 
-        <div class="col-sm-6 col-md-4 col-lg-3 mb-2">
-            <div class="card-deck">
-                <div class="card p-2 border-secondary mb-2">
-                    <img src="<?= $row['product_image'] ?>" class="card-img-top" alt="Image of Skateboard deck."  height="250">
-                    <div class="card-body p-1">
-                        <h4 class="card-title text-center text-info"><?= $row['product_name'] ?></h4>
-                        <h5 class="card-text text-center text-danger">$<?= number_format($row['product_price'], 2) ?></h5>
-                    </div>
-                    <div class="card-footer p-1">
-                        <form action="" class="form-submit">
-                            <input type="hidden" name="" class="pid" value="<?=$row['id']?>">
-                            <input type="hidden" name="" class="pname" value="<?=$row['product_name']?>">
-                            <input type="hidden" name="" class="pprice" value="<?=$row['product_price']?>">
-                            <input type="hidden" name="" class="pimage" value="<?=$row['product_image']?>">
-                            <input type="hidden" name="" class="pcode" value="<?=$row['product_code']?>">
-                            <button class="btn btn-info btn-block addItemBtn">
-                                <i class="fas fa-cart-plus"></i>&nbsp;&nbsp;Add to Cart
-                            </button>
-                        </form>
-                  
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php endwhile; ?>
+                $result = $stmnt->get_result(); //store the result of query into a variable.
+
+                while($row = $result->fetch_assoc()):
+                ?>
+                    <tr>
+                       
+                        <td>
+                            <img src="<?php echo $row['pc_image']; ?>" alt="img of skate product"> <br>
+                            <strong><a href="products.php?pc_id=<?= $row['pc_id'] ?>"><?php echo $row['pc_title']; ?></a></strong>
+                        </td>
+                        <td>
+                            <?php echo $row['pc_desc']; ?>
+                        </td>
+                    </tr>
+
+
+                <?php endwhile; ?>
+            </tbody>
+        </table>   
     </div>
+   
 </div>
+<!--END OF PRODUC CATEGORIES DISPLAY-->
+
+
+
 
 <!-- Footer -->
 <footer class="page-footer font-small blue">
@@ -112,42 +125,23 @@
 
 <script type="text/javascript">
     $(document).ready(function(){
-        $(".addItemBtn").click(function(e){
-            e.preventDefault();
+    
 
-            var $form = $(this).closest(".form-submit");
-            var pid = $form.find(".pid").val();
-            var pname = $form.find(".pname").val();
-            var pprice = $form.find(".pprice").val();
-            var pimage = $form.find(".pimage").val();
-            var pcode = $form.find(".pcode").val();
+        load_cart_item_number();
 
+        function load_cart_item_number()
+        {
             $.ajax({
-                url: 'action.php', 
-                method: 'post',
-                data: {pid:pid, pname:pname, pprice:pprice, pimage:pimage, pcode:pcode},
-                success:function(response){
-                    $("#message").html(response);
-                    window.scrollTo(0 ,0); //When we click on any add to cart button it will make the page scroll to the top to see the message.
-                    load_cart_item_number();
+                url: 'action.php',
+                method: 'get',
+                data: {cartItem: "cart_item"},
+                success: function(response)
+                {
+                    $("#cart-item").html(response);   
                 }
             });
-
-            load_cart_item_number();
-
-            function load_cart_item_number()
-            {
-                $.ajax({
-                    url: 'action.php',
-                    method: 'get',
-                    data: {cartItem: "cart_item"},
-                    success: function(response)
-                    {
-                        $("#cart-item").html(response);   
-                    }
-                });
-            }
-        });
+        }
+        
     });
 </script>
     

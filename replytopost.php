@@ -8,7 +8,7 @@
         if (!isset($_GET['post_id']) || !isset($_GET['c_id']))
         {
             //echo "<h1>Big nut</h1>";
-            header("Location: topiclist.php");
+            header("Location: forumcategories.php");
             exit;
         }
     
@@ -64,7 +64,7 @@
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-            <a class="nav-link" href="i#">About</a>
+            <a class="nav-link" href="#">About</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">Contact Us</a>
